@@ -7,8 +7,8 @@ Este código permite realizar operaciones básicas de gestión de transferencias
 
 Para poder ejecutar la API, se deben cumplir los siguientes prerrequisitos:
 
-- Tener instalado Node.js 
-- Tener instalado PostgreSQL .
+- Node.js 
+- PostgreSQL .
 - Tener instalado un cliente de PostgreSQL, como por ejemplo pgAdmin.
 
 
