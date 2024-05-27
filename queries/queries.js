@@ -1,4 +1,5 @@
 import client from '../config/db.js';
+import chalk from 'chalk';
 
 const argumentos = process.argv.slice(2)
 
@@ -38,25 +39,35 @@ const nueva_transferencia = async (arg2, arg3, arg4, arg5, arg6) => {
 
         const ultimaTransferencia = await client.query('SELECT * FROM transferencias ORDER BY fecha DESC LIMIT 1');
         console.log(ultimaTransferencia.rows)
-        console.log('Transferencia realizada con éxito');
+        console.log(chalk.white.bgGreen.bold('Transferencia realizada con éxito'));
 
         client.end();
 
     
     } catch (error) {
-        console.error(error);
-        throw error;
+        console.error(chalk.white.bgRed.bold('Error en la transferencia'));
+        console.error(chalk.red(error.message));
+        client.end();
     }
 };
 
 const consultarUltimasTransferencias = async (arg2) => {
     try {
         await client.connect();
+
+        const verificarIdUsuario = 'SELECT * FROM cuentas WHERE id = $1';
+        const resultadoUsuario = await client.query(verificarIdUsuario, [arg2]);
+
+        if (resultadoUsuario.rowCount === 0) {
+            throw new Error(chalk.white.bgRed.bold(`No se encontró la cuenta de origen con ID ${arg2}`));
+        }
+
         const res = await client.query('SELECT * FROM transferencias WHERE cuenta_origen = $1 ORDER BY fecha DESC LIMIT 10', [arg2]);
         console.log(res.rows);
-        console.log('Consulta realizada con éxito');
+        console.log(chalk.white.bgGreen.bold('Consulta realizada con éxito'));
+
     } catch (error) {
-        console.error(error);
+        console.error(chalk.red(error.message));
     } finally {
         client.end();
     }
@@ -65,11 +76,24 @@ const consultarUltimasTransferencias = async (arg2) => {
 const consultarSaldo = async (arg2) => {
     try {
         await client.connect();
+
+        const verificarIdUsuario = 'SELECT * FROM cuentas WHERE id = $1';
+        const resultadoUsuario = await client.query(verificarIdUsuario, [arg2]);
+
+        if (resultadoUsuario.rowCount === 0) {
+            throw new Error(chalk.white.bgRed.bold(`No se encontró la cuenta de origen con ID ${arg2}`));
+        }
+
         const res = await client.query('SELECT saldo FROM cuentas WHERE id = $1', [arg2]);
-        console.log(res.rows);
-        console.log('Consulta realizada con éxito');
+        const saldo = res.rows[0].saldo;
+        
+
+        const mensaje = `El saldo de la cuenta es de $${saldo}.`;
+
+        console.log(mensaje);
+        console.log(chalk.white.bgGreen.bold('Consulta realizada con éxito'));
     } catch (error) {
-        console.error(error);
+        console.error(chalk.red(error.message));
     } finally {
         client.end();
     }
